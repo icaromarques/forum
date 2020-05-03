@@ -26,8 +26,6 @@ public class PostService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostService.class);
 
-    private static final String CREATIONDATE = "creationDate";
-
     @Autowired
     PostRepository repository;
 
@@ -63,28 +61,28 @@ public class PostService {
         }
 
 
-        if (post.getLikes() != null && post.getLikes().size() >0) {
+        if (post.getLikes() != null && post.getLikes().size() > 0) {
             User userAux = userService.findByNameIgnoreCase(post.getLikes().get(0).getName());
 
-                if (userAux == null) {
-                    userAux = new User(post.getLikes().get(0).getName());
-                    userAux = userService.save(userAux);
-                }
+            if (userAux == null) {
+                userAux = new User(post.getLikes().get(0).getName());
+                userAux = userService.save(userAux);
+            }
 
-                Post postAux = this.findById(post.getId());
-                post.setLikes(postAux.getLikes());
+            Post postAux = this.findById(post.getId());
+            post.setLikes(postAux.getLikes());
 
             User finalUserAux = userAux;
             User userlike = post.getLikes()
-                        .stream()
-                        .filter(u->u.getId() == finalUserAux.getId()).findAny().orElse(null);
+                    .stream()
+                    .filter(u -> u.getId() == finalUserAux.getId()).findAny().orElse(null);
 
-                if (userlike != null) {
-                    post.getLikes().remove(userlike);
-                } else {
-                    post.getLikes().add(userAux);
-                }
+            if (userlike != null) {
+                post.getLikes().remove(userlike);
+            } else {
+                post.getLikes().add(userAux);
             }
+        }
 
         try {
             post = repository.saveAndFlush(post);
@@ -118,70 +116,55 @@ public class PostService {
 
     @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
     public PostReturnList findByType(Integer firstResult, Integer maxResults, Integer questionId, PostTypeEnum typeEnum,
-                                     String text, Boolean notAnsewered) throws Exception {
+                                     String text, Boolean notAnsewered, Sort.Direction direction, String sortField) throws Exception {
 
         PostReturnList postReturnList = null;
-        if (firstResult != null && maxResults != null) {
-            if (questionId == null) {
-                if (text == null && !notAnsewered) {
-                    Page<Post> page = repository.findByPostTypeOrderByCreationDateDesc(typeEnum,
-                            PageRequest.of(
-                                    firstResult,
-                                    maxResults,
-                                    Sort.by(Sort.Direction.DESC, CREATIONDATE)));
-
-                    postReturnList = new PostReturnList(page.getTotalPages() - 1,
-                            page.getNumber(),
-                            page.toList());
-                    return postReturnList;
-                } else if (text == null) {
-                    Page<Post> page = repository.findByPostTypeAndAnswersIsEmptyOrderByCreationDateDesc(typeEnum,
-                            PageRequest.of(
-                                    firstResult,
-                                    maxResults,
-                                    Sort.by(Sort.Direction.DESC, CREATIONDATE)));
-
-                    postReturnList = new PostReturnList(page.getTotalPages() - 1,
-                            page.getNumber(),
-                            page.toList());
-                    return postReturnList;
-                } else if (!notAnsewered) {
-                    Page<Post> page = repository
-                            .findByPostTypeAndTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByCreationDateDesc(typeEnum,
-                                    text,
-                                    text,
-                                    PageRequest.of(
-                                            firstResult,
-                                            maxResults,
-                                            Sort.by(Sort.Direction.DESC, CREATIONDATE)));
-
-                    postReturnList = new PostReturnList(page.getTotalPages() - 1,
-                            page.getNumber(),
-                            page.toList());
-                    return postReturnList;
-                } else {
-                    Page<Post> page = repository
-                            .findWithFilters(typeEnum,
-                                    text,
-                                    text,
-                                    PageRequest.of(
-                                            firstResult,
-                                            maxResults,
-                                            Sort.by(Sort.Direction.DESC, CREATIONDATE)));
-
-                    postReturnList = new PostReturnList(page.getTotalPages() - 1,
-                            page.getNumber(),
-                            page.toList());
-                    return postReturnList;
-                }
-            } else {
-
-                Post question = this.findById(questionId);
-                Page<Post> page = repository
-                        .findByPostTypeAndQuestionOrderByCreationDateDesc(typeEnum, question, PageRequest.of(
+        if (questionId == null) {
+            if (text == null && !notAnsewered) {
+                Page<Post> page = repository.findByPostType(typeEnum,
+                        PageRequest.of(
                                 firstResult,
                                 maxResults,
-                                Sort.by(Sort.Direction.DESC, CREATIONDATE)));
+                                Sort.by(direction, sortField)));
+
+                postReturnList = new PostReturnList(page.getTotalPages() - 1,
+                        page.getNumber(),
+                        page.toList());
+                return postReturnList;
+            } else if (text == null) {
+                Page<Post> page = repository.findByPostTypeAndAnswersIsEmpty(typeEnum,
+                        PageRequest.of(
+                                firstResult,
+                                maxResults,
+                                Sort.by(direction, sortField)));
+
+                postReturnList = new PostReturnList(page.getTotalPages() - 1,
+                        page.getNumber(),
+                        page.toList());
+                return postReturnList;
+            } else if (!notAnsewered) {
+                Page<Post> page = repository
+                        .findByPostTypeAndTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(typeEnum,
+                                text,
+                                text,
+                                PageRequest.of(
+                                        firstResult,
+                                        maxResults,
+                                        Sort.by(direction, sortField)));
+
+                postReturnList = new PostReturnList(page.getTotalPages() - 1,
+                        page.getNumber(),
+                        page.toList());
+                return postReturnList;
+            } else {
+                Page<Post> page = repository
+                        .findWithFilters(typeEnum,
+                                text,
+                                text,
+                                PageRequest.of(
+                                        firstResult,
+                                        maxResults,
+                                        Sort.by(direction, sortField)));
 
                 postReturnList = new PostReturnList(page.getTotalPages() - 1,
                         page.getNumber(),
@@ -189,39 +172,20 @@ public class PostService {
                 return postReturnList;
             }
         } else {
-            if (questionId == null) {
-                if (text == null && !notAnsewered) {
 
-                    postReturnList = new PostReturnList(0, 0, repository
-                            .findByPostTypeOrderByCreationDateDesc(typeEnum));
-                    return postReturnList;
+            Post question = this.findById(questionId);
+            Page<Post> page = repository
+                    .findByPostTypeAndQuestion(typeEnum, question, PageRequest.of(
+                            firstResult,
+                            maxResults,
+                            Sort.by(direction, sortField)));
 
-                } else if (text == null) {
-                    postReturnList = new PostReturnList(0, 0, repository
-                            .findByPostTypeAndAnswersIsEmptyOrderByCreationDateDesc(typeEnum));
-                    return postReturnList;
-                } else if (!notAnsewered) {
-                    postReturnList = new PostReturnList(0, 0, repository
-                            .findByPostTypeAndTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByCreationDateDesc(typeEnum,
-                                    text,
-                                    text));
-
-                    return postReturnList;
-
-                } else {
-                    postReturnList = new PostReturnList(1, 1, repository
-                            .findWithFilters(typeEnum,
-                                    text,
-                                    text));
-                    return postReturnList;
-                }
-            } else {
-                Post question = this.findById(questionId);
-                postReturnList = new PostReturnList(1, 1, repository
-                        .findByPostTypeAndQuestionOrderByCreationDateDesc(typeEnum, question));
-                return postReturnList;
-            }
+            postReturnList = new PostReturnList(page.getTotalPages() - 1,
+                    page.getNumber(),
+                    page.toList());
+            return postReturnList;
         }
+
     }
 
 }

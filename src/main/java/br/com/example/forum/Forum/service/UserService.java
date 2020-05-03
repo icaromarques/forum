@@ -20,18 +20,18 @@ public class UserService {
     UserRepository repository;
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public User save(User user) throws Exception {
+    public User save(User user)  {
         return repository.saveAndFlush(user);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-    public User findById(Integer id) throws Exception {
+    public User findById(Integer id)  {
         Optional<User> user = repository.findById(id);
         return user.orElse(null);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
-    public User findByNameIgnoreCase(String name) throws Exception {
+    public User findByNameIgnoreCase(String name)  {
         Optional<User> user = repository.findByNameIgnoreCase(name);
         return user.orElse(null);
     }

@@ -10,10 +10,12 @@ public class ValidationException extends Exception {
 
     public ValidationException() {
         super(MSG_UNKOWN);
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
     public ValidationException(String message) {
         super(message);
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
     public ValidationException(Throwable t,HttpStatus status) {

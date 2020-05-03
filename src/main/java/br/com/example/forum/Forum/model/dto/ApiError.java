@@ -24,15 +24,15 @@ public class ApiError {
     public ApiError(HttpStatus status, String message, Throwable ex) {
         this.status = status.value();
         this.message = message;
-        this.error =  ex.getCause().getLocalizedMessage();
-        this.debugMessage =  ex.getCause().getMessage();
+        this.error =  ex.getCause()!= null?ex.getCause().getLocalizedMessage():"";
+        this.debugMessage =  ex.getCause()!= null?ex.getCause().getMessage():"";
     }
     public ApiError(ValidationException ex, String path) {
         this.status = ex.getStatus().value();
         this.path = path;
         this.message = ex.getLocalizedMessage();
-        this.error = ex.getCause().getLocalizedMessage();
-        this.debugMessage = ex.getCause().getMessage();
+        this.error = ex.getCause()!= null?ex.getCause().getLocalizedMessage():"";
+        this.debugMessage = ex.getCause()!=null?ex.getCause().getMessage():"";
     }
 
     public LocalDateTime getTimestamp() {

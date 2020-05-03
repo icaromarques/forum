@@ -26,8 +26,9 @@ public class Post extends Persistent {
         this.likes = new ArrayList<>();
     }
 
-    public Post(String title, String description, User user, LocalDateTime creationDate, Post question,
+    public Post(Integer id, String title, String description, User user, LocalDateTime creationDate, Post question,
                 List<Post> answers, PostTypeEnum postType,List<User> likes) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.user = user;
@@ -40,6 +41,7 @@ public class Post extends Persistent {
 
     public Post(Integer question) {
         this.id = question;
+        this.user = new User();
     }
 
     @Override

@@ -9,6 +9,7 @@ import br.com.example.forum.Forum.model.enumeration.PostTypeEnum;
 import br.com.example.forum.Forum.service.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,21 @@ public class PostController {
 
 
     @GetMapping("/questions")
-    public ResponseEntity<PostReturnList> findQuestions(@RequestParam(required=false) Integer page,
-                                                          @RequestParam(required=false) Integer maxValue,
-                                                          @RequestParam(required=false) String text,
-                                                       @RequestParam(required=false) Boolean notAnsewered) throws Exception {
+    public ResponseEntity<PostReturnList> findQuestions(@RequestParam(required=true) Integer page,
+                                                        @RequestParam(required=true) Integer maxValue,
+                                                        @RequestParam(required=false) String text,
+                                                        @RequestParam(required=false) Boolean notAnsewered,
+                                                        @RequestParam(required=false) Sort.Direction direction,
+                                                        @RequestParam(required=false)String sortField) throws Exception {
 
-        PostReturnList posts = service.findByType(page,maxValue,null,PostTypeEnum.QUESTION,text,notAnsewered == null?false:notAnsewered);
+        PostReturnList posts = service.findByType(page,
+                maxValue,
+                null,
+                PostTypeEnum.QUESTION,
+                text,
+                notAnsewered == null?false:notAnsewered,
+                direction==null? Sort.Direction.ASC:direction ,
+                sortField==null?"creationDate":sortField);
 
         posts.setPosts(posts.getPostsOriginal().stream()
                 .map(this::convertToDto)
@@ -42,11 +52,11 @@ public class PostController {
     }
 
     @GetMapping("/answers")
-    public ResponseEntity<PostReturnList> findAllAnswers(@RequestParam Integer questionId,
-                                                        @RequestParam(required=false) Integer page,
-                                                          @RequestParam(required=false) Integer maxValue) throws Exception {
+    public ResponseEntity<PostReturnList> findAllAnswers(@RequestParam(required=true) Integer questionId,
+                                                         @RequestParam(required=true) Integer page,
+                                                         @RequestParam(required=true) Integer maxValue) throws Exception {
 
-        PostReturnList posts = service.findByType(page,maxValue,questionId,PostTypeEnum.ANSWER, null, null);
+        PostReturnList posts = service.findByType(page,maxValue,questionId,PostTypeEnum.ANSWER, null, null, Sort.Direction.ASC, "creationDate");
         posts.setPosts(posts.getPostsOriginal().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList()));
