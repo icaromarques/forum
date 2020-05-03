@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="Icaro">
+
+
+        <createSequence sequenceName="post_seq" schemaName="public" startValue="1" incrementBy="1" cycle="false"/>
+
+        <createTable schemaName="public" tableName="post">
+            <column name="id" type="integer"  defaultValueSequenceNext="post_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="creation_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="post_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="upvotes" type="integer"/>
+            <column name="id_post" type="integer">
+                <constraints nullable="true"/>
+            </column>
+            <column name="id_user" type="integer">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="user_seq" schemaName="public" startValue="1" incrementBy="1" cycle="false"/>
+
+        <createTable schemaName="public" tableName="user">
+            <column name="id" type="integer" defaultValueSequenceNext="user_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="creation_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avatar_color" type="varchar(7)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="id_post"
+                                 baseTableName="post"
+                                 constraintName="fk_answer_question"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+
+        <addForeignKeyConstraint baseColumnNames="id_user"
+                                 baseTableName="post"
+                                 constraintName="fk_user_post"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>
