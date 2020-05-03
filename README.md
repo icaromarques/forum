@@ -6,11 +6,19 @@ This is the way to execute this project in local machine. Prerequisites:
 * Java 8
 * Maven
 
-####Steps to run
+#### Steps to run
 
 Execute "mvn package" command to build the application into the "target" folder.
 
 Into the folder where you generatad the jar file, execute "java -jar Forum-0.0.1-SNAPSHOT.jar"
+
+##### Docker
+
+If you prefer, you can use docker to run this app. Execute the command bellow to get the image. 
+
+    docker pull icaroafonso/forum
+   
+   
 ### API Documentation
 This link show how to use this API, in a Postman documentation.  
 
